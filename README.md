@@ -12,4 +12,6 @@
 
 **data ingestion** : In this step use jupiter notbook (uv add --dev jupyter notebook) to load the data and prepare for ingestion in postegre, create script of ingestion use sqlalchemy for ingestion data in postegre, the data is so big use chunck to partition the ingestion.  After connect to postegre to see porgression of ingestion
 
+**ingestion script** : use clic to better ingestion with parameter in engine et define default paramater can use in terminal or modify in terminal for secur and goog pratice
+
 
