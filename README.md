@@ -14,6 +14,6 @@
 
 **ingestion script** : use clic to better ingestion with parameter in engine et define default paramater can use in terminal or modify in terminal for secur and goog pratice
 
-**pgadmin** : use pgdamin interface web because it's usefull for complex query than pgcli in the terminal, for run that need to connect to pgdatabase in the same network in docker, to do that, we will create docker network and define in the same docker. After use the link to go to web site of pgdmin enter identifiant and password, create server and explore the databse. When you link pgdatabase with pgdamin the ingestion in pgdatabase goes in pgadmin directly.
+**pgadmin** : use pgdamin interface web because it's usefull for complex query than pgcli in the terminal, for run that need to connect to pgdatabase in the same network in docker, to do that, we will create docker network and define in the same docker network. After use the link to go to web site of pgdmin enter identifiant and password, create server and explore the databse. When you link pgdatabase with pgdamin the ingestion in pgdatabase goes in pgadmin directly.
 
 
