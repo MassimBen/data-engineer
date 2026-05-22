@@ -16,4 +16,6 @@
 
 **pgadmin** : use pgdamin interface web because it's usefull for complex query than pgcli in the terminal, for run that need to connect to pgdatabase in the same network in docker, to do that, we will create docker network and define in the same docker network. After use the link to go to web site of pgdmin enter identifiant and password, create server and explore the databse. When you link pgdatabase with pgdamin the ingestion in pgdatabase goes in pgadmin directly.
 
+**dockerinzing ingestion and docker compose** : After convert a scripty to .py you dockrize (use docker file) the script with all element need, build it and run it with parameter need for postgre define un the script (with click), define the network where the pgdatabase and pgdmin are to do the ingestion and use the interface web of pgadmin to query the data ingest. To define u=in the same network in unique way use docker-compose file to store all element for both and excute it after that run the docker for ingestion.
+
 
