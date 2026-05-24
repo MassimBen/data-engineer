@@ -10,3 +10,5 @@ After that use docker compose to create network for containers pgdata and pgadmi
 Finally answer the question of homework.
 
 This explaination above it's for docker party only. After course of terraform and gcp, i will explain the plan for it.
+
+Don't forget to cre  te dockerfile for execution of python and uv for another user
