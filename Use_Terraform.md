@@ -60,4 +60,25 @@ The GCP provider automatically uses these credentials to authenticate against th
 
 ## Initialize the directory
 
+You need to run terraform init, to dowlaods all element for the provider you speficie in main.tf, he create in the directpry a hidden subdirectry the are .terraform file. Terraform also creates a lock file named .terraform.lock.hcl, which specifies the exact provider versions used to ensure that every Terraform run is consistent. This also allows you to control when you want to upgrade the providers used in your configuration.
+
+## Format and validate the configuration
+We recommend using consistent formatting in all of your configuration files. The terraform fmt command automatically updates configurations in the current directory for readability and consistency.
+
+Format your configuration. Terraform will print out the names of the files it modified, if any. In this case, your configuration file was already formatted correctly, so Terraform won't return any file names.
+
+```
+$ terraform fmt
+```
+
+For verification use terraform validate 
+
+```
+$ terraform validate
+Success! The configuration is valid.
+
+```
+
+##
+
 
