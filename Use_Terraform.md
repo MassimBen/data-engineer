@@ -9,7 +9,7 @@
 
 ## Create a working directory
 
-After configuration you create folder for terraform projet and go there, create the main.tf file and set configuration, define terraform block with version of terraform you use the required_providers with define the soruce and the proviser.
+After configuration you create folder for terraform projet and go there, create the main.tf file and set configuration, define terraform block with version of terraform you use the required_providers define the source and the proviser.
 
 ```terraform
 terraform {
