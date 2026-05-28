@@ -4,6 +4,7 @@
 ## Configuration GCP account
 
 **First step** : create a projet and take note the ID, you use for coniguration of terraform.
+
 **Second step** : enable compute engine in the projet to allow terraform to provision the infrastructure of projet.
 
 ## Create a working directory
