@@ -4,11 +4,48 @@
 
 
 **Introduction to docker** : basic command and way to use it (containerization the code), create image and use container for code or to try a code without install dependancy in local system
+ Below there are some example of command line of docker
+ 
+```
+# see version of docker
+docker --version
+# exemple of running image of python
+docker run -it python:3.13
+#example of running image with entrypoint bash
+docker run -it entrypoint=bash
+ # list of container
+docker ps
+# delete of container
+docker rm id_container or use docker rm $(docker ps -aq)
+
+
+```
 
 **Discover uv ( virtual environnement)** : it's able as to run a code in virtual environement, use it with docker to containerize and a pipeline of ingestion dans test a code without use local system ressource.
 
-**Create dockerfile**: it's usefull to write and use docker build to create a containers start directly with the file and do all thing write.
+```
+pip install uv
+```
 
+**Create dockerfile**: it's usefull to write and use docker build to create a containers start directly with the file and do all thing write.
+example
+```
+# base Docker image that we will build on
+FROM python:3.13.11-slim
+
+# set up our image by installing prerequisites; pandas in this case
+RUN pip install pandas pyarrow
+
+# set up the working directory inside the container
+WORKDIR /app
+# copy the script to the container. 1st name is source file, 2nd is destination
+COPY pipeline.py pipeline.py
+
+# define what to do first when the container runs
+# in this example, we will just run the script
+ENTRYPOINT ["python", "pipeline.py"]
+
+```
 **Postregre to docker**: create container for postgre in docker with environnement and parameters( best to do create a folder and go in create le docker inside), install pgcli with uv and connect to postgre in docker to write sql query et create database.
 
 **data ingestion** : In this step use jupiter notbook (uv add --dev jupyter notebook) to load the data and prepare for ingestion in postegre, create script of ingestion use sqlalchemy for ingestion data in postegre, the data is so big use chunck to partition the ingestion.  After connect to postegre to see porgression of ingestion
