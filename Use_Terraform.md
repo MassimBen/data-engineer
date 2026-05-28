@@ -8,7 +8,7 @@
 
 ## Create a working directory
 
-After configuration you create folder for terraform projet and go there, create the main.tf file and set configuration, define terraform block with version of terraform you use and the proviser
+After configuration you create folder for terraform projet and go there, create the main.tf file and set configuration, define terraform block with version of terraform you use the required_providers with define the soruce and the proviser.
 
 ```terraform
 terraform {
@@ -26,4 +26,6 @@ provider "google" {
   zone    = "us-central1-c"
 }
 ```
-Replcae projet_ID with you iD projet and other parameter with parameter for your situation
+Replace projet_ID with you iD projet and other parameter with parameter for your situation.
+
+
