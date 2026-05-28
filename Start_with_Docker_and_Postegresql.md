@@ -56,3 +56,33 @@ ENTRYPOINT ["python", "pipeline.py"]
 
 **dockerinzing ingestion and docker compose** : After convert a scripty to .py you dockrize (use docker file) the script with all element need, build it and run it with parameter need for postgre define un the script (with click), define the network where the pgdatabase and pgdmin are to do the ingestion and use the interface web of pgadmin to query the data ingest. To define u=in the same network in unique way use docker-compose file to store all element for both and excute it after that run the docker for ingestion.
 
+```
+services:
+  pgdatabase:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: "root"
+      POSTGRES_PASSWORD: "root"
+      POSTGRES_DB: "ny_taxi"
+    volumes:
+      - "ny_taxi_postgres_data:/var/lib/postgresql"
+    ports:
+      - "5432:5432"
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "admin@admin.com"
+      PGADMIN_DEFAULT_PASSWORD: "root"
+    volumes:
+      - "pgadmin_data:/var/lib/pgadmin"
+    ports:
+      - "8085:80"
+
+
+
+volumes:
+  ny_taxi_postgres_data:
+  pgadmin_data:
+```
+
