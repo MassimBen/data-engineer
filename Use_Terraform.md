@@ -1,4 +1,4 @@
-# Set up GCP account
+# Set up GCP account and using of Terraform for create infrastructure
 
 
 ## Configuration GCP account
@@ -38,5 +38,26 @@ resource "google_compute_network" "vpc_network" {
 ```
 The ressource you create depend what you want to use in your infrastructure.
 
+After configuration the main.tf with all element (terraform block, provider and ressource), now we need to authenticate in our googgle cloud account.
+
+## Authenticate to Google cloud
+
+```
+$ gcloud auth application-default login
+```
+
+A prompt of connection will appear in your screem, you log in when your are succefull authentication credential saved in your computer, the path will give 
+
+Example :
+
+```
+Credentials saved to file: [/Users/USER/.config/gcloud/application_default_credentials.json]
+
+These credentials will be used by any library that requests Application Default Credentials (ADC).
+```
+
+The GCP provider automatically uses these credentials to authenticate against the Google Cloud APIs.
+
+## Initialize the directory
 
 
