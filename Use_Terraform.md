@@ -29,4 +29,14 @@ provider "google" {
 ```
 Replace projet_ID with you iD projet and other parameter with parameter for your situation.
 
+Define ressource you want to create and manage in the infrastructure, in this exemple you create a network 
+
+```
+resource "google_compute_network" "vpc_network" {
+  name = "terraform-network"
+
+```
+The ressource you create depend what you want to use in your infrastructure.
+
+
 
