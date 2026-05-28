@@ -1,6 +1,6 @@
 # Set up GCP account and using of Terraform for create infrastructure
 
-## Parti 1 : Building infra with Terraform
+## Part 1 : Building infra with Terraform
 
 ### Configuration GCP account
 
@@ -80,6 +80,71 @@ Success! The configuration is valid.
 
 ```
 
-##
+### Create infrastructure
 
+If all thing is right, use terraform plan to verify all ressource will be create correctly and use terraform apply to create infra in GCP in this case.
+In below example of creating infra 
 
+```
+$ terraform apply
+
+Terraform used the selected providers to generate the following execution plan. Resource actions
+are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # google_compute_network.vpc_network will be created
+  + resource "google_compute_network" "vpc_network" {
+      + auto_create_subnetworks                   = true
+      + delete_default_routes_on_create           = false
+      + gateway_ipv4                              = (known after apply)
+      + id                                        = (known after apply)
+      + internal_ipv6_range                       = (known after apply)
+      + mtu                                       = (known after apply)
+      + name                                      = "terraform-network"
+      + network_firewall_policy_enforcement_order = "AFTER_CLASSIC_FIREWALL"
+      + numeric_id                                = (known after apply)
+      + project                                   = (known after apply)
+      + routing_mode                              = (known after apply)
+      + self_link                                 = (known after apply)
+    }
+
+Plan: 1 to add, 0 to change, 0 to destroy.
+
+Do you want to perform these actions?
+  Terraform will perform the actions described above.
+  Only 'yes' will be accepted to approve.
+
+  Enter a value:
+
+```
+Go on GCP look the infra create becarefull for looking the region and projet you specify in the configuration.
+
+### Inspect state
+
+Terraform create terraforme.tfstate to save your configuration and manage when you to chnage ou destroy it but he keep all information ( ID_projet and others)
+
+You can use terraform show to inspect you current 
+
+```
+$ terraform show
+# google_compute_network.vpc_network:
+resource "google_compute_network" "vpc_network" {
+    auto_create_subnetworks                   = true
+    delete_default_routes_on_create           = false
+    description                               = null
+    enable_ula_internal_ipv6                  = false
+    gateway_ipv4                              = null
+    id                                        = "projects/test-project/global/networks/terraform-network"
+    internal_ipv6_range                       = null
+    mtu                                       = 0
+    name                                      = "terraform-network"
+    network_firewall_policy_enforcement_order = "AFTER_CLASSIC_FIREWALL"
+    numeric_id                                = "1234567890123456789"
+    project                                   = "test-project"
+    routing_mode                              = "REGIONAL"
+    self_link                                 = "https://www.googleapis.com/compute/v1/projects/test-project/global/networks/terraform-network"
+```
+
+## Part 2 : Change infrastructure
