@@ -148,3 +148,25 @@ resource "google_compute_network" "vpc_network" {
 ```
 
 ## Part 2 : Change infrastructure
+
+### Create a new resource
+You can modify and change your infra in Terraform, you modify the main.tf file you do directly terraform apply to send your modification or use terraform plan to verify before execute terraform apply to provision your infra. In below example of adding new ressource.
+
+```
+resource "google_compute_instance" "vm_instance" {
+  name         = "terraform-instance"
+  machine_type = "f1-micro"
+
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-11"
+    }
+  }
+
+  network_interface {
+    network = google_compute_network.vpc_network.name
+    access_config {
+    }
+  }
+```
+In this example you create VM machine boot_disk and network_interface need use complex paramater, for this example use simple paramater. You use the network you create before to connect the VM machine, add acces_config give a IP adress to VM, you can have access over the internet.
