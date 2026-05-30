@@ -3,6 +3,7 @@
 ```
 pwd : know where you are
 ls : see all think in your repository
+ls -R : view all respository
 cd : navigate to an other repository or use cd .. to go back to precedent
 rm : delete file
 mv : move file
