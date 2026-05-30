@@ -18,4 +18,5 @@ less : show the file ( see the next :n, previous :p and :q quit
 grep : to eleemtn present in file ( there are flag to more thing see a documentation)
 man command : to see documentation
 paste : commbine file
+history : view a precedent command use it 
 ```
