@@ -5,7 +5,7 @@ pwd : know where you are
 ls : see all think in your repository
 cd : navigate to an other repository or use cd .. to go back to precedent
 rm : delete file
-mv : remove file
+mv : move file
 mkdir : create repository
 rmdir : delete repository
 cat : put all file in terminal
