@@ -11,6 +11,7 @@ rmdir : delete repository
 cat : put all file in terminal
 cut -f -d , file : show column and delimiter of the file
 head : show firts line
+tail : see last line
 head -n : show the first line you want
 less : show the file ( see the next :n, previous :p and :q quit
 grep : to eleemtn present in file ( there are flag to more thing see a documentation)
