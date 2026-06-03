@@ -169,6 +169,9 @@ resource "google_compute_instance" "vm_instance" {
     }
   }
 ```
+
+In this example you create VM machine boot_disk and network_interface need use complex paramater, for this example use simple paramater. You use the network you create before to connect the VM machine, add acces_config give a IP adress to VM, you can have access over the internet.
+
 ### Modify a ressource 
 
 When you modify a ressource it's update the ressource, example below
@@ -270,4 +273,3 @@ provider "google" {
 }
 ```
 
-In this example theyou create VM machine boot_disk and network_interface need use complex paramater, for this example use simple paramater. You use the network you create before to connect the VM machine, add acces_config give a IP adress to VM, you can have access over the internet.
