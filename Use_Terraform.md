@@ -123,7 +123,7 @@ Go on GCP look the infra create becarefull for looking the region and projet you
 
 ### Inspect state
 
-Terraform create terraforme.tfstate to save your configuration and manage when you to chnage ou destroy it but he keep all information ( ID_projet and others)
+Terraform create terraforme.tfstate to save your configuration and manage when you to change ou destroy it but he keep all information ( ID_projet and others)
 
 You can use terraform show to inspect you current 
 
