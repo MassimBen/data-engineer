@@ -72,7 +72,10 @@ docker logs <CONTAINER_ID ou CONTAINER_NAME>
     -f : suivre en permanence les logs du conteneur
     -t : afficher la date et l'heure de la réception de la ligne de log
     --tail <NOMBRE DE LIGNE> = nombre de lignes à afficher à partir de la fin (par défaut "all")
-
+## Transformer un conteneur en image
+docker commit <CONTAINER_NAME ou CONTAINER_ID> <NEW IMAGENAME>
+    -a ou --author <string> : Nom de l'auteur (ex "John Hannibal Smith <hannibal@a-team.com>")
+    -m ou --message <string> : Message du commit
 ## Build image
 
 Create a dockerfile for example and use docker build to create a image
@@ -92,8 +95,4 @@ After build image you can push to your docker hub
 docker push mass/docker-learn/image_name:version
 ```
 
-## Transformer un conteneur en image
-docker commit <CONTAINER_NAME ou CONTAINER_ID> <NEW IMAGENAME>
-    -a ou --author <string> : Nom de l'auteur (ex "John Hannibal Smith <hannibal@a-team.com>")
-    -m ou --message <string> : Message du commit
-```
+
