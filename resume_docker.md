@@ -89,7 +89,7 @@ version : the version of image
 After build image you can push to your docker hub
 
 ```
-docker push 
+docker push mass/docker-learn/image_name:version
 ```
 
 ## Transformer un conteneur en image
