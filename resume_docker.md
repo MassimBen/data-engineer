@@ -76,6 +76,7 @@ docker logs <CONTAINER_ID ou CONTAINER_NAME>
 docker commit <CONTAINER_NAME ou CONTAINER_ID> <NEW IMAGENAME>
     -a ou --author <string> : Nom de l'auteur (ex "John Hannibal Smith <hannibal@a-team.com>")
     -m ou --message <string> : Message du commit
+```
 ## Build image
 
 Create a dockerfile for example and use docker build to create a image
@@ -94,5 +95,5 @@ After build image you can push to your docker hub
 ```
 docker push mass/docker-learn/image_name:version
 ```
-
+Container is isolate process you can run something like frontend of you page. You use multiple containers to run multiple think in web or something else.
 
