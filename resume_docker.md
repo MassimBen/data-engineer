@@ -85,10 +85,15 @@ Create a dockerfile for example and use docker build to create a image
 docker build -t mass/docker-learn/image_name:version
 ```
 -t : it's tag you give to docker image otherwise it's a name
+
 mass : it's username
+
 docker-learn : it's the repository to put the image
+
 image_name : name of image you create
+
 version : the version of image
+
 
 After build image you can push to your docker hub
 
