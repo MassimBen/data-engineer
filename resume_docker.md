@@ -100,5 +100,8 @@ After build image you can push to your docker hub
 ```
 docker push mass/docker-learn/image_name:version
 ```
-Container is isolate process you can run something like frontend of you page. You use multiple containers to run multiple think in web or something else.
+Container is isolate envirenement can run specique task you can run something like frontend of you page. You use multiple containers to run multiple think in web or something else. it's like VM but don't need space in your machine or something, anyone can run it.
+Image it's like a package you create and you can use it any where and everyone can use when it's create and put un register docker hub or you can send it.
+
+Container it's like a receip you use to put thing in a see what happen, in thise case container contain image and run it to produce something.
 
