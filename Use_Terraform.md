@@ -1,14 +1,14 @@
-# Set up GCP account and using of Terraform for create infrastructure
+## Set up GCP account and using of Terraform for create infrastructure
 
-## Part 1 : Building infra with Terraform
+### Part 1 : Building infra with Terraform
 
-### Configuration GCP account
+#### Configuration GCP account
 
 **First step** : create a projet and take note the ID, you use for configuration of terraform.
 
 **Second step** : enable compute engine in the projet to allow terraform to provision the infrastructure of projet.
 
-### Create a working directory
+#### Create a working directory
 
 After configuration you create folder for terraform projet and go there, create the main.tf file and set configuration, define terraform block with version of terraform you use the required_providers define the source and the provider.
 
