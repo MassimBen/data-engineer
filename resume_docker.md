@@ -133,3 +133,7 @@ Multiple Compose files can be merged together to define the application model. T
 
 If you want to reuse other Compose files, or factor out parts of your application model into separate Compose files, you can also use include. This is useful if your Compose application is dependent on another application which is managed by a different team, or needs to be shared with others.
 
+Example for docker compsoe see in thise [link](https://docs.docker.com/compose/intro/compose-application-model/)
+
+Docker compose is constitue with service, environnement,volume, config, network or secret tout depnd what you want to build; Use volume to have persitance database 
+
