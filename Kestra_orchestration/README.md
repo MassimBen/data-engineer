@@ -130,3 +130,22 @@ If you want to comment or uncomment out part of your code, use CTRL + / on Windo
 
 ### Create and run a flow
 To this point, we have shown some flows to run and get familiar with. Now, let’s create a flow to use throughout the rest of the tutorial. Open the Flows view and click + Create: For other step follow the tutoriel fundamental
+
+## Input
+
+It's allow to modify the flow to put parameter and use is everywhere in the flow.
+
+```
+id: getting_started
+namespace: company.team
+
+inputs:
+  - id: api_url
+    type: STRING
+    defaults: https://dummyjson.com/products
+
+tasks:
+  - id: api
+    type: io.kestra.plugin.core.http.Request
+    uri: "{{ inputs.api_url }}"
+```
