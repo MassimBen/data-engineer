@@ -149,3 +149,72 @@ tasks:
     type: io.kestra.plugin.core.http.Request
     uri: "{{ inputs.api_url }}"
 ```
+
+## Outputs
+
+Use it to see the output of the flow you use execute, he can be a message in log or result for script or query.
+
+Below there two example flow with output message and flow with output table 
+
+message 
+
+```
+id: getting_started
+namespace: company.team
+
+inputs:
+  - id: api_url
+    type: STRING
+    defaults: https://dummyjson.com/products
+
+tasks:
+  - id: api
+    type: io.kestra.plugin.core.http.Request
+    uri: "{{ inputs.api_url }}"
+
+  - id: log
+    type: io.kestra.plugin.core.log.Log
+    message: "API Status Code: {{ outputs.api.code }}"
+```
+
+output with result
+
+```
+id: getting_started
+namespace: company.team
+
+inputs:
+  - id: api_url
+    type: STRING
+    defaults: https://dummyjson.com/products
+
+tasks:
+  - id: api
+    type: io.kestra.plugin.core.http.Request
+    uri: "{{ inputs.api_url }}"
+
+  - id: python
+    type: io.kestra.plugin.scripts.python.Script
+    containerImage: python:slim
+    beforeCommands:
+      - pip install polars
+    outputFiles:
+      - "products.csv"
+    script: |
+      import polars as pl
+      data = {{ outputs.api.body | jq('.products') | first }}
+      df = pl.from_dicts(data)
+      df.glimpse()
+      df.select(["brand", "price"]).write_csv("products.csv")
+
+  - id: sqlQuery
+    type: io.kestra.plugin.jdbc.duckdb.Query
+    inputFiles:
+      in.csv: "{{ outputs.python.outputFiles['products.csv'] }}"
+    sql: |
+      SELECT brand, round(avg(price), 2) as avg_price
+      FROM read_csv_auto('{{ workingDir }}/in.csv', header=True)
+      GROUP BY brand
+      ORDER BY avg_price DESC;
+    store: true
+```
