@@ -218,3 +218,28 @@ tasks:
       ORDER BY avg_price DESC;
     store: true
 ```
+
+## Triggers
+
+Triggers help us to configure a repetive task in the flow, you can define triggers like task .
+
+```
+triggers:
+  - id: every_monday_at_10_am
+    type: io.kestra.plugin.core.trigger.Schedule
+    cron: 0 10 * * 1
+```
+
+this trgiggers define to run a flow define above all monday at 10 AM
+
+the instruction cron can explain : 
+
+```
+┌───────── minute (0)
+│ ┌─────── hour (10 = 10:00 AM)
+│ │ ┌───── day of month (* = every day)
+│ │ │ ┌─── month (* = every month)
+│ │ │ │ ┌─ day of week (1 = Monday)
+│ │ │ │ │
+0 10 * * 1
+```
