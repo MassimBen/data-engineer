@@ -1,12 +1,13 @@
 # Note learning kestra orchestration
 
+[Link tutorial kestra](https://kestra.io/docs/tutorial)
 The first think learn about kestra it's a flow.
 Flow it's a way you design a task you want to excute in kestra, you need to define a id ( you can't change after create), a namespace, description ( if you want to decribe) and finally the task, it's instruction you say to in your flow.
 
 Above I explain a flow in this part I will more detail ( after lecture of that)
 
 ## Flow
-Flows are defined in a declarative YAML syntax to keep the orchestration code portable and language-agnostic.
+[Flows](https://kestra.io/docs/workflow-components/flow) are defined in a declarative YAML syntax to keep the orchestration code portable and language-agnostic.
 
 Each flow consists of three required components: id, namespace, and tasks.
 
@@ -35,7 +36,7 @@ The combination of id and namespace is the unique identifier for a flow.
 
 ### Namespaces
 
-Namespaces are used to group flows and provide structure. Keep in mind that a flow’s allocation to a namespace is immutable. Once a flow is created, you cannot change its namespace. If you need to change the namespace of a flow, create a new flow within the desired namespace and delete the old flow.
+[Namespaces](https://kestra.io/docs/workflow-components/namespace) are used to group flows and provide structure. Keep in mind that a flow’s allocation to a namespace is immutable. Once a flow is created, you cannot change its namespace. If you need to change the namespace of a flow, create a new flow within the desired namespace and delete the old flow.
 
 ### Labels
 To add another layer of organization, use labels to group flows with key-value pairs. In short, labels are customizable tags to simplify monitoring and filtering of flows and executions. For example, taking the flow above, we can add a label with the key tag to define the flow as Getting Started:
@@ -82,7 +83,7 @@ tasks:
 ## Tasks
 Now that you know how to document and organize your flows, it’s time to get to the core of orchestration: tasks.
 
-Tasks are atomic actions in your flows. You can design your tasks to be small and granular, such as fetching data from a REST API or running a self-contained Python script. However, tasks can also represent large and complex processes, like triggering containerized processes or long-running batch jobs (e.g., using dbt, Spark, AWS Batch, Azure Batch, etc.) and waiting for their completion.
+[Tasks](https://kestra.io/docs/workflow-components/tasks) are atomic actions in your flows. You can design your tasks to be small and granular, such as fetching data from a REST API or running a self-contained Python script. However, tasks can also represent large and complex processes, like triggering containerized processes or long-running batch jobs (e.g., using dbt, Spark, AWS Batch, Azure Batch, etc.) and waiting for their completion.
 
 ### Task execution order
 Tasks are defined as a list. By default, all tasks in the list will be executed sequentially — the second task will start as soon as the first one finishes successfully.
@@ -133,7 +134,7 @@ To this point, we have shown some flows to run and get familiar with. Now, let�
 
 ## Inputs
 
-It's allow to modify the flow to put parameter and use is everywhere in the flow.
+It's allow to modify the flow to put parameter and use is everywhere in the flow. [Input documentation](https://kestra.io/docs/workflow-components/inputs)
 
 ```
 id: getting_started
@@ -152,7 +153,7 @@ tasks:
 
 ## Outputs
 
-Use it to see the output of the flow you use execute, he can be a message in log or result for script or query.
+Use it to see the output of the flow you use execute, he can be a message in log or result for script or query. [Outputs documentation](https://kestra.io/docs/workflow-components/outputs)
 
 Below there two example flow with output message and flow with output table 
 
@@ -221,7 +222,7 @@ tasks:
 
 ## Triggers
 
-Triggers help us to configure a repetive task in the flow, you can define triggers like task .
+[Triggers](https://kestra.io/docs/workflow-components/triggers) help us to configure a repetive task in the flow, you can define triggers like task .
 
 ```
 triggers:
@@ -249,9 +250,11 @@ It's allow to custom flow to put some iteration and condition for executing task
 
 Tasks from the Core Flow plugin control flow logic. Use them to run tasks in parallel or sequentially, branch conditionally, iterate over items, pause, or allow specific tasks to fail without stopping the execution.
 
+[Flowable task documentation](https://kestra.io/docs/workflow-components/tasks/flowable-tasks)
+
 ### if task
 For example, you can use the If task to specify your conditions and define what action to take based on whether those conditions are met.
-You excute a task if condition it's verify and it's not verify execute the else
+You excute a task if condition it's verify and it's not verify execute the else. [if documentation](https://kestra.io/plugins/core/flow/io.kestra.plugin.core.flow.if)
 
 ```
 id: getting_started
