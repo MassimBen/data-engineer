@@ -363,7 +363,7 @@ tasks:
 
 This flow checks an HTTP endpoint every 30 seconds and stops either when it returns 200 or after 50 attempts, whichever comes first. You can reference the child task outputs (here outputs.healthCheck.code) inside the condition expression. See the [LoopUntil task documentation](https://kestra.io/plugins/core/flow/io.kestra.plugin.core.flow.loopuntil) for additional options.
 
-## Add parallelism using Flowable tasks
+### Add parallelism using Flowable tasks
 A common orchestration requirement is executing independent processes in parallel. For example, you can process data for each partition in parallel. This can significantly speed up the processing time.
 
 The flow below uses the ForEach flowable task to execute a list of tasks in parallel.
@@ -371,8 +371,7 @@ The flow below uses the ForEach flowable task to execute a list of tasks in para
 - The concurrencyLimit property with value 0 makes the list of tasks to execute in parallel.
 - The values property defines the list of items to iterate over.
 - The tasks property defines the list of tasks to execute for each item in the list. You can access the iteration value using the {{ taskrun.value }} variable.
-
-  ```
+ ```
   id: python_partitions
 namespace: company.team
 
@@ -413,4 +412,136 @@ tasks:
           Kestra.counter('nr_rows', nr_rows, {'partition': filename})
           Kestra.timer('processing_time', processing_time, {'partition': filename})
   ```
+### Errors
+
+### Handle errors with retries and alerts
+By default, if any task fails, the execution stops and is marked as failed. For more control over error handling, you can add the errors property, AllowFailure tasks, or automatic retries.
+
+The errors property allows you to execute one or more actions before terminating the flow (e.g., sending an email or a Slack message to your team). The property is named errors because it is triggered when errors occur within a flow.
+
+You can implement error handling at the flow level or namespace level:
+
+Flow-level: Useful to implement custom alerting for a specific flow or task. This can be accomplished by adding the errors property.
+Namespace-level: Useful to send a notification for any failed Execution within a given namespace. This approach allows you to implement centralized error handling for all flows within a given namespace.
+
+#### Flow-level error handling using errors
+The errors property of a flow accepts a list of tasks to execute when an error occurs. You can add as many tasks as you want, and they will be executed sequentially similar to the tasks block.
+
+The following example workflow automatically sends a Slack alert via the SlackIncomingWebhook whenever any flow in the company.team namespace fails or finishes with warnings.
+
+```
+id: unreliable_flow
+namespace: company.team
+
+tasks:
+  - id: fail
+    type: io.kestra.plugin.core.execution.Fail
+
+errors:
+  - id: alert_on_failure
+    type: io.kestra.plugin.slack.notifications.SlackIncomingWebhook
+    url: "{{ secret('SLACK_WEBHOOK') }}" # https://hooks.slack.com/services/xyz/xyz/xyz
+    messageText: "Failure alert for flow {{ flow.namespace }}.{{ flow.id }} with ID {{ execution.id }}"
+
+```
+
+Taking our flow from earlier stages, we can add a Slack alert on an execution error like the following
+
+```
+id: getting_started_category_check
+namespace: company.team
+
+inputs:
+  - id: category
+    type: SELECT
+    displayName: Select a category
+    values: ['beauty', 'notebooks']
+    defaults: 'beauty'
+
+tasks:
+  - id: api
+    type: io.kestra.plugin.core.http.Request
+    uri: "https://dummyjson.com/products/category/{{ inputs.category }}"
+    method: GET
+
+  - id: check_products
+    type: io.kestra.plugin.core.flow.If
+    condition: "{{ json(outputs.api.body).products | length > 0 }}"
+    then:
+      - id: log_status
+        type: io.kestra.plugin.core.log.Log
+        message: "Found {{ json(outputs.api.body).products | length }} products for category {{ inputs.category }}"
+      - id: python
+        type: io.kestra.plugin.scripts.python.Script
+        containerImage: python:slim
+        dependencies:
+          - polars
+        outputFiles:
+          - "products.csv"
+        script: |
+          import polars as pl
+          data = {{ outputs.api.body | jq('.products') | first }}
+          df = pl.from_dicts(data)
+          df.glimpse()
+          df.select(["title", "brand", "price", "rating"]).write_csv("products.csv")
+      - id: sqlQuery
+        type: io.kestra.plugin.jdbc.duckdb.Queries
+        inputFiles:
+          in.csv: "{{ outputs.python.outputFiles['products.csv'] }}"
+        sql: |
+          SELECT brand, round(avg(price), 2) AS avg_price, count(*) AS cnt
+          FROM read_csv_auto('{{ workingDir }}/in.csv', header=True)
+          GROUP BY brand
+          ORDER BY avg_price DESC;
+        store: true
+    else:
+      - id: when_false
+        type: io.kestra.plugin.core.log.Log
+        message: "No products found for category {{ inputs.category }}."
+
+errors:
+  - id: alert_on_failure
+    type: io.kestra.plugin.slack.notifications.SlackIncomingWebhook
+    url: "{{ secret('SLACK_WEBHOOK') }}"
+    messageText: "Failure alert for flow {{ flow.namespace }}.{{ flow.id }} with ID {{ execution.id }}"
+
+triggers:
+  - id: every_monday_at_10_am
+    type: io.kestra.plugin.core.trigger.Schedule
+    cron: 0 10 * * 1
+```
+Now if there is an error, say our API endpoint is unreachable, we’ll get a Slack alert notifying a team to investigate. For more, check the [error handling](https://kestra.io/docs/workflow-components/errors) page.
+
+#### Namespace-level error handling using a flow trigger
+To get notified on a workflow failure, you can leverage Kestra’s built-in notification tasks, including:
+
+- Slack
+- Microsoft Teams
+- Email
+For centralized namespace-level alerting, add a dedicated monitoring workflow with one of the notification tasks above and a Flow trigger. Below is an example workflow that automatically sends a Slack alert as soon as any flow in the namespace company.team fails or finishes with warnings.
+
+```
+id: failure_alert
+namespace: system
+
+tasks:
+  - id: send
+    type: io.kestra.plugin.slack.notifications.SlackExecution
+    url: "{{ secret('SLACK_WEBHOOK') }}"
+    executionId: "{{ trigger.executionId }}"
+
+triggers:
+  - id: listen
+    type: io.kestra.plugin.core.trigger.Flow
+    conditions:
+      - type: io.kestra.plugin.core.condition.ExecutionStatus
+        in:
+          - FAILED
+          - WARNING
+      - type: io.kestra.plugin.core.condition.ExecutionNamespace
+        namespace: company.team
+        prefix: true
+```
+
+To learn more about retry and configuration read this [documentation errors](https://kestra.io/docs/tutorial/errors)
 
