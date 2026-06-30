@@ -243,3 +243,119 @@ the instruction cron can explain :
 │ │ │ │ │
 0 10 * * 1
 ```
+## Flowable task
+
+It's allow to custom flow to put some iteration and condition for executing task like language of programmation.
+
+Tasks from the Core Flow plugin control flow logic. Use them to run tasks in parallel or sequentially, branch conditionally, iterate over items, pause, or allow specific tasks to fail without stopping the execution.
+
+### if task
+For example, you can use the If task to specify your conditions and define what action to take based on whether those conditions are met.
+You excute a task if condition it's verify and it's not verify execute the else
+
+```
+id: getting_started
+namespace: company.team
+
+inputs:
+  - id: category
+    type: SELECT
+    displayName: Select a category
+    values: ['beauty', 'notebooks']
+    defaults: 'beauty'
+
+tasks:
+  - id: api
+    type: io.kestra.plugin.core.http.Request
+    uri: "https://dummyjson.com/products/category/{{ inputs.category }}"
+    method: GET
+
+  - id: check_products
+    type: io.kestra.plugin.core.flow.If
+    condition: "{{ json(outputs.api.body).products | length > 0 }}"
+    then:
+      - id: log_status
+        type: io.kestra.plugin.core.log.Log
+        message: "Found {{ json(outputs.api.body).products | length }} products for category {{ inputs.category }}"
+      - id: python
+        type: io.kestra.plugin.scripts.python.Script
+        containerImage: python:slim
+        dependencies:
+          - polars
+        outputFiles:
+          - "products.csv"
+        script: |
+          import polars as pl
+          data = {{ outputs.api.body | jq('.products') | first }}
+          df = pl.from_dicts(data)
+          df.glimpse()
+          # Keep a simple view for this category
+          df.select(["title", "brand", "price"]).write_csv("products.csv")
+      - id: sqlQuery
+        type: io.kestra.plugin.jdbc.duckdb.Query
+        inputFiles:
+          in.csv: "{{ outputs.python.outputFiles['products.csv'] }}"
+        sql: |
+          SELECT brand, round(avg(price), 2) AS avg_price, count(*) AS cnt
+          FROM read_csv_auto('{{ workingDir }}/in.csv', header=True)
+          GROUP BY brand
+          ORDER BY avg_price DESC;
+        store: true
+    else:
+      - id: when_false
+        type: io.kestra.plugin.core.log.Log
+        message: "No products found for category {{ inputs.category }}."
+
+triggers:
+  - id: every_monday_at_10_am
+    type: io.kestra.plugin.core.trigger.Schedule
+    cron: 0 10 * * 1
+```
+
+### forEach 
+
+Like for loop you use it to excute a task for value in list 
+
+The ForEach flowable task executes a group of tasks for each value in the list. There are many ways to implement ForEach for complex looping operations, possibly incorporating conditional flowable tasks or subtasks. See more examples in the [ForEach documentation](https://kestra.io/plugins/core/flow/io.kestra.plugin.core.flow.foreach).
+```
+id: for_loop_example
+namespace: tutorial
+
+tasks:
+  - id: for_each
+    type: io.kestra.plugin.core.flow.ForEach
+    values: ["pynchon", "dostoyevsky", "hedayat"]
+    tasks:
+      - id: api
+        type: io.kestra.plugin.core.http.Request
+        uri: "https://openlibrary.org/search.json?author={{ taskrun.value }}&sort=new"
+```
+
+### LoopUntil
+You can also loop until an external system reports a healthy status. The LoopUntil task reruns its child tasks until a condition becomes true, which is helpful for polling APIs or long-running jobs.
+
+Key options:
+
+- condition — evaluated after each run and can reference the latest child outputs (for example {{ outputs.healthCheck.code }}).
+- tasks — the steps executed on every loop iteration.
+- checkFrequency — optional guardrails controlling the poll interval plus maximum iterations or duration.
+
+```
+id: loop_until_health_check
+namespace: tutorial
+
+tasks:
+  - id: loop
+    type: io.kestra.plugin.core.flow.LoopUntil
+    condition: "{{ outputs.healthCheck.code == 200 }}"
+    checkFrequency:
+      interval: PT30S
+      maxIterations: 50
+    tasks:
+      - id: healthCheck
+        type: io.kestra.plugin.core.http.Request
+        method: GET
+        uri: https://kestra.io
+```
+
+This flow checks an HTTP endpoint every 30 seconds and stops either when it returns 200 or after 50 attempts, whichever comes first. You can reference the child task outputs (here outputs.healthCheck.code) inside the condition expression. See the [LoopUntil task documentation](https://kestra.io/plugins/core/flow/io.kestra.plugin.core.flow.loopuntil) for additional options.
