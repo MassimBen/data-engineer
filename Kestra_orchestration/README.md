@@ -231,7 +231,7 @@ triggers:
     cron: 0 10 * * 1
 ```
 
-this trgiggers define to run a flow define above all monday at 10 AM
+this triggers define to run a flow define above all monday at 10 AM
 
 the instruction cron can explain : 
 
