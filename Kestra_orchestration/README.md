@@ -545,3 +545,28 @@ triggers:
 
 To learn more about retry and configuration read this [documentation errors](https://kestra.io/docs/tutorial/errors)
 
+### Execution
+
+There sveral ways for execute flow for kestra you can excute directly in kestra or use the url and excute in API (Postman) or use curl or in python.
+Learn more in this [link](https://kestra.io/docs/workflow-components/execution?clid=eyJpIjoiVTN5cmlHOG9CQkUxZHlZemo1TFMwIiwiaCI6IiIsInAiOiIvZGUtem9vbWNhbXAvZXhlY3V0aW9uIiwidCI6MTc4Mjk0NDA1MX0.yOpY5QleTtz8HmsKSg_0A4seRkY26NmWpo6-Va-nlNE) for excution.
+
+```
+id: load_data_to_bigquery
+namespace: company.team
+
+tasks:
+  - id: http_download
+    type: io.kestra.plugin.core.http.Download
+    uri: https://huggingface.co/datasets/kestra/datasets/raw/main/csv/orders.csv
+
+  - id: load_bigquery
+    type: io.kestra.plugin.gcp.bigquery.Load
+    description: Load data into BigQuery
+    autodetect: true
+    csvOptions:
+      fieldDelimiter: ","
+    destinationTable: kestra-dev.demo.orders
+    format: CSV
+    from: "{{ outputs.http_download.uri }}"
+```
+
