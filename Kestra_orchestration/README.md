@@ -654,3 +654,20 @@ tasks:
     type: io.kestra.plugin.core.log.Log
     message: Hello "{{ vars }}"
 ```
+Initially, state is FAILED and ansibleTicket is myticket. Within the flow, the updateVariables task uses io.kestra.plugin.core.execution.SetVariables to modify state to SUCCESS and ansibleTicket to new ticket value per the request task, as well as change one of the nested variables, nested.child to new value (nested.unchanged is unmodified so it’ll remain the same).
+
+After the flow runs, state, ansibleTicket, and nested.child have their new values, and nested.unchanged remains unchanged.
+
+#### Delete or unset execution variables
+To unset variables, use io.kestra.plugin.core.execution.UnsetVariables. Building on the example above, add the following task:
+
+  - id: deleteVariables
+    type: io.kestra.plugin.core.execution.UnsetVariables
+    variables:
+      - state
+      - ansibleTicket
+      - nested.child # remove only this key from the nested map
+
+After executing the flow, the only remaining variable is nested.unchanged with the value stay the same. In the unset task, state, ansibleTicket, and nested.child were deleted.
+
+For learning more about variable use this [link](https://kestra.io/docs/workflow-components/variables?clid=eyJpIjoiMFpySWxQalcwLVBCVXJYU2xZZlliIiwiaCI6IiIsInAiOiIvZGUtem9vbWNhbXAvdmFyaWFibGVzIiwidCI6MTc4MzAwMDU2MH0.ZwUpzZ4xrOLTBiL1Rl_F3mCo5lMWFVI-m2tsRKtUvoE)
