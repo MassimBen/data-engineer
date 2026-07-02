@@ -569,4 +569,88 @@ tasks:
     format: CSV
     from: "{{ outputs.http_download.uri }}"
 ```
+### Variables
 
+You can use variables to define variable but the différence with inputs, you can modify them use it in the flow ovoid repetiton.
+
+Variables are key-value pairs that let you reuse values across tasks.
+
+You can also store variables at the namespace level to reuse them across multiple flows in that namespace.
+
+### How to configure variables
+
+The example below shows how you can configure variables in your flow:
+```
+id: hello_world
+namespace: company.team
+
+variables:
+  myvar: hello
+  numeric_variable: 42
+
+tasks:
+  - id: log
+    type: io.kestra.plugin.core.debug.Return
+    format: "{{ vars.myvar }} world {{ vars.numeric_variable }}"
+```
+
+Use variables with the syntax {{ vars.variable_name }}.
+
+#### How variables are rendered
+You can use variables in any task property documented as dynamic.
+
+Dynamic variables are rendered by the Pebble templating engine, which processes expressions with filters and functions. More information on variable processing can be found under [Expressions](https://kestra.io/docs/expressions).
+
+#### Dynamic variables
+
+If a variable contains an expression, wrap it with render when using it in a task.
+
+For example, the variable below displays the current time only when wrapped with render; otherwise, the log prints the expression as a string:
+
+```
+id: dynamic_variable
+namespace: company.team
+
+variables:
+  time: "{{ now() }}"
+
+tasks:
+  - id: log
+    type: io.kestra.plugin.core.log.Log
+    message: "{{ render(vars.time) }}"
+```
+
+### Set or modify execution variables
+The SetVariables and UnsetVariables tasks can modify or delete variables within the execution context. For example, take the following flow:
+
+```
+id: variables_demo
+namespace: company.team
+
+variables:
+  state: FAILED
+  ansibleTicket: myticket
+  nested:
+    child: property
+    unchanged: stay the same
+
+tasks:
+  - id: request
+    type: io.kestra.plugin.core.output.OutputValues
+    values:
+      ansibleTicket: new ticket value
+      state: SUCCESS
+
+  - id: updateVariables
+    type: io.kestra.plugin.core.execution.SetVariables
+    overwrite: true # true by default
+    variables:
+      state: "{{ outputs.request.values.state }}"
+      ansibleTicket: "{{ outputs.request.values.ansibleTicket }}"
+      nested:
+        child: new value
+
+  - id: confirmUpdate
+    type: io.kestra.plugin.core.log.Log
+    message: Hello "{{ vars }}"
+```
