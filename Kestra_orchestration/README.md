@@ -671,3 +671,126 @@ To unset variables, use io.kestra.plugin.core.execution.UnsetVariables. Building
 After executing the flow, the only remaining variable is nested.unchanged with the value stay the same. In the unset task, state, ansibleTicket, and nested.child were deleted.
 
 For learning more about variable use this [link](https://kestra.io/docs/workflow-components/variables?clid=eyJpIjoiMFpySWxQalcwLVBCVXJYU2xZZlliIiwiaCI6IiIsInAiOiIvZGUtem9vbWNhbXAvdmFyaWFibGVzIiwidCI6MTc4MzAwMDU2MH0.ZwUpzZ4xrOLTBiL1Rl_F3mCo5lMWFVI-m2tsRKtUvoE)
+
+### Reduce Repetition by Setting Global Plugin Defaults
+
+#### Plugin defaults are default values applied to every task of a given type within one or more flows.
+
+They work like default function arguments, helping you avoid repetition when tasks or plugins frequently use the same values.
+
+Plugin Defaults on a flow-level
+You can define plugin defaults in the pluginDefaults section to avoid repeating properties across multiple tasks of the same type. For example:
+
+```
+id: api_python_sql
+namespace: company.team
+
+tasks:
+  - id: api
+    type: io.kestra.plugin.core.http.Request
+    uri: https://dummyjson.com/products
+
+  - id: hello
+    type: io.kestra.plugin.scripts.python.Script
+    script: |
+      print("Hello World!")
+
+  - id: python
+    type: io.kestra.plugin.scripts.python.Script
+    beforeCommands:
+      - pip install polars
+    outputFiles:
+      - "products.csv"
+    script: |
+      import polars as pl
+      data = {{outputs.api.body | jq('.products') | first}}
+      df = pl.from_dicts(data)
+      df.glimpse()
+      df.select(["brand", "price"]).write_csv("products.csv")
+
+  - id: sql_query
+    type: io.kestra.plugin.jdbc.duckdb.Query
+    inputFiles:
+      in.csv: "{{ outputs.python.outputFiles['products.csv'] }}"
+    sql: |
+      SELECT brand, round(avg(price), 2) as avg_price
+      FROM read_csv_auto('{{workingDir}}/in.csv', header=True)
+      GROUP BY brand
+      ORDER BY avg_price DESC;
+    store: true
+
+pluginDefaults:
+  - type: io.kestra.plugin.scripts.python.Script
+    values:
+      taskRunner:
+        type: io.kestra.plugin.scripts.runner.docker.Docker
+        pullPolicy: ALWAYS # set it to NEVER to use a local image
+      containerImage: python:slim
+```
+
+In this example, Docker and Python configurations are defined once in pluginDefaults, instead of being repeated in every task. This approach helps to streamline the configuration process and reduce the chances of errors caused by inconsistent settings across different tasks.
+
+##### forced attribute in pluginDefaults
+Setting forced: true in pluginDefaults ensures that default values override any properties defined directly in the task. By default, the value of the forced attribute is false.
+
+#### Precedence of plugin defaults
+Kestra applies non-forced plugin defaults from lowest to highest priority:
+
+- Global plugin defaults (kestra.plugins.defaults)
+- Namespace-level plugin defaults
+- Flow-level pluginDefaults
+- Properties defined directly on the task
+
+For forced defaults the direction reverses — the most privileged level wins:
+
+- Global forced defaults (kestra.plugins.defaults with forced: true) ← highest priority
+- Namespace-level forced defaults
+- Flow-level forced defaults
+- This means a global forced default cannot be overridden by a namespace-level forced default. Use global forced defaults for platform-wide policies that must apply unconditionally.
+
+#### Plugin defaults in a global configuration
+Plugin defaults can also be defined globally in your Kestra configuration, applying the same values across all flows. This is useful when you want to apply the same defaults across multiple flows. Let’s say that you want to centrally manage the default values for the io.kestra.plugin.aws plugin to reuse the same credentials and region across all your flows. You can add the following to your Kestra configuration:
+
+```
+kestra:
+  plugins:
+    defaults:
+      - type: io.kestra.plugin.aws
+        values:
+          accessKeyId: "{{ secret('AWS_ACCESS_KEY_ID') }}"
+          secretKeyId: "{{ secret('AWS_SECRET_ACCESS_KEY') }}"
+          region: "us-east-1"
+```
+If you want to set defaults only for a specific task, you can do that too:
+
+```
+kestra:
+  plugins:
+    defaults:
+      - type: io.kestra.plugin.aws.s3.Upload
+        values:
+          accessKeyId: "{{ secret('AWS_ACCESS_KEY_ID') }}"
+          secretKeyId: "{{ secret('AWS_SECRET_ACCESS_KEY') }}"
+          region: "us-east-1"
+```
+
+#### Nested property values
+
+For plugins with nested properties, define the values using the same nested YAML structure you would use in a flow. For example, to set resource limits for the Kubernetes task runner:
+
+```
+kestra:
+  plugins:
+    defaults:
+      - type: io.kestra.plugin.ee.kubernetes.runner.Kubernetes
+        forced: true
+        values:
+          resources:
+            limit:
+              cpu: "1"
+              memory: "128Mi"
+```
+
+This is equivalent to writing the same nested structure directly in a task. The forced: true attribute ensures these defaults override any values set at the task level.
+
+For more about plugin in the entreprise edition follow this [link](https://kestra.io/docs/workflow-components/plugin-defaults?clid=eyJpIjoiUGI0QzhmU2p1RHItc00tU2ZhVTNiIiwiaCI6IiIsInAiOiIvZGUtem9vbWNhbXAvcGx1Z2luLWRlZmF1bHRzIiwidCI6MTc4MzAwMjMwNX0.3SNhD0l2FmNC4dFBjeazn5QK7v8Ms2PHIrq5ovq5znI) 
