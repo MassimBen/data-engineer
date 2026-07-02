@@ -794,3 +794,67 @@ kestra:
 This is equivalent to writing the same nested structure directly in a task. The forced: true attribute ensures these defaults override any values set at the task level.
 
 For more about plugin in the entreprise edition follow this [link](https://kestra.io/docs/workflow-components/plugin-defaults?clid=eyJpIjoiUGI0QzhmU2p1RHItc00tU2ZhVTNiIiwiaCI6IiIsInAiOiIvZGUtem9vbWNhbXAvcGx1Z2luLWRlZmF1bHRzIiwidCI6MTc4MzAwMjMwNX0.3SNhD0l2FmNC4dFBjeazn5QK7v8Ms2PHIrq5ovq5znI) 
+
+
+### Concurency
+
+Allow us to put a limit for some kind of task 
+
+```
+id: concurrency_example
+namespace: company.team
+
+concurrency:
+  limit: 2
+
+tasks:
+  - id: wait
+    type: io.kestra.plugin.scripts.shell.Commands
+    commands:
+      - sleep 10
+```
+#### When to use concurrency
+
+Protect a shared target system (databases, SaaS APIs, warehouses) from overload.
+
+Enforce sequential processing for stateful workloads (one ETL load at a time).
+
+Keep a small, fixed number of parallel executions within an external rate limit.
+
+#### When not to use concurrency
+
+Throttling worker CPU/RAM usage — tune worker thread pools or task runners instead.
+
+Replacing task-level limits — use task runner settings (e.g., container resources) and retry/backoff for per-task control.
+
+Broad platform protection — use platform sizing and queue configuration rather than flow-level concurrency locks.
+
+```
+id: concurrency_example
+namespace: company.team
+
+concurrency:
+  limit: 2
+
+tasks:
+  - id: wait
+    type: io.kestra.plugin.scripts.shell.Commands
+    commands:
+      - sleep 10
+
+```
+
+#### behavior property
+You can customize the behavior when the concurrency limit is reached by choosing to queue, cancel, or fail the new execution. To do that, set the behavior Enum-type property to one of the following values:
+
+- QUEUE
+  
+- CANCEL
+  
+- FAIL
+  
+For example, with concurrency.limit set to 2 and CANCEL or FAIL behavior, the third execution is immediately marked as CANCELLED or FAILED without running any tasks.
+
+Below is a full flow example that uses the concurrency property to limit the number of concurrent executions to 2. The bash task sleeps for 10 seconds, so you can trigger multiple executions of that flow and see how the concurrency property behaves.
+
+To learn more about concurrency read this [pages](https://kestra.io/docs/workflow-components/concurrency?clid=eyJpIjoibTZ6cWRldTEyZEhBdERnRE9WNW5yIiwiaCI6IiIsInAiOiIvZGUtem9vbWNhbXAvY29uY3VycmVuY3kiLCJ0IjoxNzgzMDA5MTMyfQ.Vi1bYBQmRZQEqoQKg7BX72QikpXtPjvzwivGy72--9g) .
