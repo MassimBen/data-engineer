@@ -1,4 +1,3 @@
-Voici la version mise à jour du `README.md`. J'ai considérablement approfondi les sections **Window Functions** (avec des exemples concrets issus du jeu de données Taxi du Zoomcamp) et **BigQuery ML** (avec les étapes d'évaluation et les types de modèles), tout en gardant le formatage propre pour GitHub.
 
 ***
 N'hésite pas à rajouter un badge en haut de ton README comme ça :
