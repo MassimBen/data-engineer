@@ -1,12 +1,9 @@
-
-
-
 ```markdown
 # 📚 BigQuery - Cheatsheet & Notes (DataTalksClub DE Zoomcamp - Module 3)
 
 Ce document est un résumé exhaustif du Module 3 du Data Engineering Zoomcamp. Il couvre les fondamentaux du Data Warehousing, l'architecture interne de BigQuery, l'optimisation des coûts et les fonctionnalités avancées.
 
----
+```
 
 ## 🏢 1. Data Warehouse et BigQuery
 
@@ -17,9 +14,7 @@ Ce document est un résumé exhaustif du Module 3 du Data Engineering Zoomcamp. 
 ### Schema-on-Write vs Schema-on-Read
 *   **Schema-on-Write (OLTP) :** Le schéma est vérifié *avant* d'écrire. Si la donnée ne correspond pas, elle est rejetée.
 *   **Schema-on-Read (BigQuery) :** On charge les données brutes très rapidement. Le schéma est appliqué *au moment de la lecture* (lors de la requête SQL).
-
----
-
+  
 ## ⚙️ 2. Internals of BigQuery (Sous le capot)
 
 *   **Disaggregated Architecture :** Le stockage et la puissance de calcul sont gérés par des services indépendants.
