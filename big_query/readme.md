@@ -1,8 +1,6 @@
 
-***
-N'hésite pas à rajouter un badge en haut de ton README comme ça :
-`![BigQuery](https://img.shields.io/badge/BigQuery-Module_3-4285F4?style=for-the-badge&logo=google-cloud&logoColor=white)` 
-pour le rendre plus visuel !
+
+
 ```markdown
 # 📚 BigQuery - Cheatsheet & Notes (DataTalksClub DE Zoomcamp - Module 3)
 
