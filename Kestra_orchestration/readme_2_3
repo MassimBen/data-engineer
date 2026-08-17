@@ -1,0 +1,271 @@
+Voici le résumé détaillé des **Modules 2 et 3 du Data Engineering Zoomcamp (Édition 2026)**, mis à jour pour intégrer **Kestra** comme outil d'orchestration. Le format est prêt à être copié-collé sur GitHub.
+
+***
+
+# Module 2 : Orchestration de flux de travail avec Kestra
+
+Ce module aborde l'orchestration des données. Pour l'édition 2026, le cours introduit **Kestra**, un orchestrateur open-source moderne, basé sur une approche déclarative (YAML) et orienté événements (event-driven). Le module montre comment automatiser les pipelines ETL et interagir avec Google Cloud Platform (GCP).
+
+## 📑 Table des matières
+1. [Concepts de l'Orchestration de Données](#1-concepts-de-lorchestration-de-données)
+2. [Introduction à Kestra](#2-introduction-à-kestra)
+3. [Configuration de l'environnement GCP](#3-configuration-de-lenvironnement-gcp)
+4. [Construction du pipeline ETL avec Kestra](#4-construction-du-pipeline-etl-avec-kestra)
+5. [Paramétrage, Déclencheurs et Planification](#5-paramétrage-déclencheurs-et-planification)
+
+---
+
+### 1. Concepts de l'Orchestration de Données
+- **Pourquoi orchestrer ?** Un script Python exécuté manuellement ne suffit pas en production. Il faut gérer les dépendances, les relances automatiques (retries), la surveillance (monitoring), les alertes et l'exécution programmée.
+- **ETL vs ELT :** Différence entre Extract-Transform-Load (transformer avant de charger) et Extract-Load-Transform (charger les données brutes puis les transformer dans l'entrepôt, ce qui sera abordé au Module 3).
+- **Workflows et DAGs :** Représentation d'un flux de travail où les tâches s'exécutent dans un ordre défini, avec gestion des dépendances.
+
+### 2. Introduction à Kestra
+- **Kestra :** Un orchestrateur de données universel qui permet de concevoir, exécuter et surveiller des workflows de manière déclarative.
+- **Approche déclarative (YAML) :** Contrairement à Airflow ou Mage où le code Python domine, Kestra repose sur des fichiers YAML simples pour définir les flux (Flows), rendant la maintenance et le versionnage beaucoup plus accessibles.
+- **Concepts clés de Kestra :**
+  - *Flows :* La définition du workflow (le DAG).
+  - *Tasks :* Les étapes individuelles (ex: télécharger un fichier, exécuter un script Python, interroger une BDD).
+  - *Triggers :* Ce qui lance le workflow (un cron, un webhook, un événement de fichier, etc.).
+  - *Internal Storage :* Kestra gère automatiquement le passage de données (fichiers, variables) entre les tâches via son stockage interne.
+- **Exécution locale :** Lancement aisé via Docker Compose.
+
+### 3. Configuration de l'environnement GCP
+Préparation du cloud pour accueillir les données extraites par Kestra.
+- **Création d'un projet GCP.**
+- **Configuration des identifiants :** Création d'un compte de service (Service Account) avec les permissions nécessaires (Storage Admin, BigQuery Admin) et téléchargement de la clé JSON.
+- **Google Cloud Storage (GCS) :** Création d'un bucket pour stocker les fichiers de données brutes (format Parquet).
+
+### 4. Construction du pipeline ETL avec Kestra
+Création d'un pipeline déclaratif (YAML) qui reproduit l'ingestion du Module 1, mais de façon orchestrée :
+- **Extract (Tâche `io.kestra.plugin.core.http.Download`) :** Téléchargement du dataset NYC Taxi depuis une URL.
+- **Transform (Tâche `io.kestra.plugin.scripts.python.Script`) :** Utilisation de Python/Pandas au sein d'un conteneur Docker géré par Kestra pour nettoyer les données (ex: filtrer les trajets nuls, conversion de dates).
+- **Load (Tâche `io.kestra.plugin.gcp.gcs.Upload`) :** Envoi des données transformées vers le bucket GCS.
+- **Passage de données :** Utilisation des variables internes de Kestra (ex: `{{ outputs.download_task.uri }}`) pour lier les tâches entre elles.
+
+### 5. Paramétrage, Déclencheurs et Planification
+- **Variables et Secrets :** Stockage sécurisé de la clé JSON GCP dans les variables d'environnement de Kestra ou via les intégrations de secrets managers.
+- **Scheduling :** Utilisation de la tâche `io.kestra.plugin.core.trigger.Schedule` pour exécuter le flux automatiquement (ex: tous les jours à 2h00).
+- **Event-driven (Avancé) :** Introduction aux déclencheurs basés sur les événements (ex: déclencher un flux dès qu'un nouveau fichier arrive dans un bucket GCS).
+
+---
+
+## 🛠️ Commandes et Code utiles (Module 2)
+
+**Lancer Kestra en local via Docker :**
+```bash
+# Téléchargement du fichier docker-compose.yml officiel de Kestra
+curl -L https://raw.githubusercontent.com/kestra-io/kestra/main/docker-compose.yml -o docker-compose.yml
+
+# Démarrer Kestra
+docker-compose up -d
+
+# Accéder à l'interface UI : http://localhost:8080/ui
+```
+
+**Exemple de Flow Kestra (`etl_nyc_taxi.yaml`) :**
+```yaml
+id: etl_nyc_taxi_to_gcs
+namespace: de_zoomcamp_module_2
+
+inputs:
+  - id: dataset_url
+    type: STRING
+    defaults: "https://github.com/DataTalksClub/nyc-tlc-data/releases/download/yellow/yellow_tripdata_2021-01.csv.gz"
+
+tasks:
+  - id: download_data
+    type: io.kestra.plugin.core.http.Download
+    uri: "{{ inputs.dataset_url }}"
+
+  - id: transform_data
+    type: io.kestra.plugin.scripts.python.Script
+    containerImage: python:3.9-slim
+    beforeCommands:
+      - pip install pandas pyarrow
+    script: |
+      import pandas as pd
+      import os
+      
+      # Kestra injecte automatiquement le fichier de la tâche précédente
+      input_path = "{{ outputs.download_data.uri }}"
+      output_path = "transformed_data.parquet"
+      
+      df = pd.read_csv(input_path, compression='gzip')
+      # Nettoyage basique
+      df = df[df['passenger_count'] > 0]
+      df.to_parquet(output_path)
+      
+      # Export pour Kestra
+      print(f"::set-output name=output_file::{output_path}")
+
+  - id: upload_to_gcs
+    type: io.kestra.plugin.gcp.gcs.Upload
+    serviceAccount: "{{ secret('GCP_SERVICE_ACCOUNT_JSON') }}"
+    bucket: "de-zoomcamp-bucket-2026"
+    from: "{{ outputs.transform_data.vars.output_file }}"
+    to: "nyc_taxi/2021-01.parquet"
+
+triggers:
+  - id: daily_schedule
+    type: io.kestra.plugin.core.trigger.Schedule
+    cron: "0 2 * * *"
+```
+
+***
+***
+
+# Module 3 : Entrepôt de Données et dbt (BigQuery)
+
+Ce module se concentre sur l'Analytique. Il explique comment modéliser, stocker et transformer les données dans un Data Warehouse cloud (Google BigQuery) en utilisant l'outil de transformation **dbt (data build tool)**, le tout orchestré par Kestra.
+
+## 📑 Table des matières
+1. [Concepts du Data Warehousing](#1-concepts-du-data-warehousing)
+2. [OLTP vs OLAP et BigQuery](#2-oltp-vs-olap-et-bigquery)
+3. [Partitionnement et Clustering](#3-partitionnement-et-clustering)
+4. [Introduction à dbt (data build tool)](#4-introduction-à-dbt-data-build-tool)
+5. [Modélisation des données avec dbt](#5-modélisation-des-données-avec-dbt)
+6. [Tests, Documentation et Orchestration](#6-tests-documentation-et-orchestration)
+
+---
+
+### 1. Concepts du Data Warehousing
+- **Data Warehouse (Entrepôt de données) :** Une base de données optimisée pour l'analyse (OLAP), capable de traiter des volumes massifs de données et des requêtes d'agrégation complexes.
+- **Sources de données :** Les données proviennent de multiples sources (Postgres, API, fichiers plats dans GCS) et sont consolidées dans l'entrepôt.
+
+### 2. OLTP vs OLAP et BigQuery
+- **OLTP (Online Transaction Processing) :** Optimisé pour les transactions rapides, lecture/écriture de lignes uniques (ex: Postgres utilisé au Module 1).
+- **OLAP (Online Analytical Processing) :** Optimisé pour lire de grandes quantités de données et faire des agrégations (ex: BigQuery).
+- **Google BigQuery :** Un Data Warehouse serverless. Pas besoin de gérer des serveurs. On paie à la requête (basé sur le volume de données scannées).
+
+### 3. Partitionnement et Clustering
+L'optimisation des coûts et des performances est cruciale dans le cloud.
+- **Partitionnement (Partitioning) :** Diviser une grande table en plus petits segments selon une colonne de date (ex: par jour ou par mois). Permet de ne scanner que les partitions pertinentes lors d'une requête temporelle, réduisant drastiquement les coûts.
+- **Clustering (Clustering) :** Organiser les données en fonction des valeurs d'une colonne (ex: `PULocationID`). Utile pour les requêtes qui filtrent souvent par cette colonne.
+
+### 4. Introduction à dbt (data build tool)
+- **Le problème :** Si l'on transforme les données avec du SQL imbriqué dans des scripts Python, le code devient vite illisible, non testable et difficile à maintenir.
+- **dbt :** Un framework qui permet d'écrire des transformations SQL sous forme de "modèles" (models). dbt compile ce SQL et l'exécute dans le Data Warehouse (BigQuery).
+- **ELT :** dbt représente le "T" (Transform) d'un processus ELT. Les données brutes sont chargées (Load) dans BigQuery (par Kestra au Module 2), puis transformées *à l'intérieur* du Data Warehouse en utilisant sa puissance de calcul.
+
+### 5. Modélisation des données avec dbt
+Le module couvre la création de pipelines de transformation en SQL avec dbt.
+- **Sources (Sources) :** Définition des tables brutes chargées par Kestra dans BigQuery.
+- **Modèles Staging (`stg_`) :** Nettoyage de base, renommage de colonnes, typage strict (ex: conversion de chaînes en dates, filtrage des valeurs aberrantes).
+- **Modèles Core / Fact (`fct_`) :** Tables de faits contenant les événements ou transactions métier (ex: trajets de taxi avec distances et tarifs).
+- **Modèles Dimensionnels (`dim_`) :** Tables de dimension contenant le contexte descriptif (ex: liste des zones de taxi). Approche en *Star Schema*.
+- **Matérialisation :** Comment dbt stocke le résultat. Utilisation de vues (View), de tables physiques (Table) et surtout de tables incrémentales (Incremental) pour ajouter uniquement les nouvelles données sans tout recalculer.
+
+### 6. Tests, Documentation et Orchestration
+- **Tests dbt :** Vérification de la qualité des données (ex: s'assurer qu'une colonne `trip_id` est unique, ou qu'il n'y a pas de valeurs nulles pour `passenger_count`).
+- **Documentation :** Génération automatique de site web statique décrivant le pipeline, les tables et les colonnes (fonctionnalité `dbt docs generate`).
+- **DAG dbt :** dbt construit automatiquement le graphe de dépendances (DAG) entre les modèles.
+- **Orchestration avec Kestra :** Comment déclencher les commandes `dbt run` et `dbt test` directement depuis un flow Kestra en utilisant la tâche `io.kestra.plugin.scripts.shell.Commands` ou un plugin dbt dédié.
+
+---
+
+## 🛠️ Commandes et Code utiles (Module 3)
+
+**Initialiser un projet dbt :**
+```bash
+# Installation
+pip install dbt-bigquery
+
+# Initialiser le projet dans le dossier courant
+dbt init de_zoomcamp_dbt
+```
+
+**Commandes d'exécution dbt :**
+```bash
+# Tester la connexion à BigQuery
+dbt debug
+
+# Exécuter tous les modèles
+dbt run
+
+# Exécuter un modèle spécifique et ses dépendances
+dbt run --select stg_green_tripdata+
+
+# Lancer les tests de qualité de données
+dbt test
+
+# Générer et visualiser la documentation
+dbt docs generate
+dbt docs serve --port 8081
+```
+
+**Exemple de modèle dbt (`fct_trips.sql`) avec partitionnement et incrémentiel :**
+```sql
+{{ config(
+    materialized='incremental',
+    partition_by={'field': 'pickup_datetime', 'data_type': 'timestamp'},
+    cluster_by=['pickup_location_id']
+) }}
+
+WITH stg_trips AS (
+    SELECT * FROM {{ ref('stg_green_tripdata') }}
+),
+dim_zones AS (
+    SELECT * FROM {{ ref('dim_zones') }}
+)
+
+SELECT
+    t.trip_id,
+    t.pickup_datetime,
+    t.dropoff_datetime,
+    t.trip_distance,
+    t.total_amount,
+    z_pickup.zone_name AS pickup_zone_name,
+    z_dropoff.zone_name AS dropoff_zone_name
+FROM stg_trips t
+LEFT JOIN dim_zones z_pickup
+    ON t.pickup_location_id = z_pickup.location_id
+LEFT JOIN dim_zones z_dropoff
+    ON t.dropoff_location_id = z_dropoff.location_id
+
+{% if is_incremental() %}
+  -- Ne charger que les nouveaux trajets si la table existe déjà
+  WHERE t.pickup_datetime > (SELECT MAX(pickup_datetime) FROM {{ this }})
+{% endif %}
+```
+
+**Exemple de Flow Kestra pour exécuter dbt (`dbt_pipeline.yaml`) :**
+```yaml
+id: run_dbt_transformations
+namespace: de_zoomcamp_module_3
+
+tasks:
+  - id: clone_repo
+    type: io.kestra.plugin.core.git.Clone
+    url: https://github.com/votre-utilisateur/de_zoomcamp_dbt
+    branch: main
+    
+  - id: dbt_deps
+    type: io.kestra.plugin.scripts.shell.Commands
+    containerImage: ghcr.io/dbt-labs/dbt-bigquery:latest
+    workingDir: "{{ outputs.clone_repo.directory }}"
+    commands:
+      - dbt deps
+      
+  - id: dbt_run
+    type: io.kestra.plugin.scripts.shell.Commands
+    containerImage: ghcr.io/dbt-labs/dbt-bigquery:latest
+    workingDir: "{{ outputs.clone_repo.directory }}"
+    env:
+      # Authentification via la variable d'environnement DBT_ENV_SECRET_GOOGLE_SERVICE_ACCOUNT
+      DBT_ENV_SECRET_GOOGLE_SERVICE_ACCOUNT: "{{ secret('GCP_SERVICE_ACCOUNT_JSON') }}"
+    commands:
+      - dbt run --profiles-dir .
+      
+  - id: dbt_test
+    type: io.kestra.plugin.scripts.shell.Commands
+    containerImage: ghcr.io/dbt-labs/dbt-bigquery:latest
+    workingDir: "{{ outputs.clone_repo.directory }}"
+    env:
+      DBT_ENV_SECRET_GOOGLE_SERVICE_ACCOUNT: "{{ secret('GCP_SERVICE_ACCOUNT_JSON') }}"
+    commands:
+      - dbt test --profiles-dir .
+```
+
+---
+*Ceci est un résumé basé sur le curriculum de DataTalksClub Data Engineering Zoomcamp (édition 2026 avec Kestra). Pour suivre le cours officiel, consultez le dépôt [DataTalksClub/data-engineering-zoomcamp](https://github.com/DataTalksClub/data-engineering-zoomcamp) sur GitHub.*
