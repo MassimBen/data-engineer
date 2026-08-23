@@ -884,4 +884,4 @@ Cette fiche couvre l'intégralité du **Module 6 (Streaming)** :
 
 > 💡 Copiez ce contenu dans `module6-streaming-kafka.md` et poussez-le sur GitHub. Pour pratiquer : lancez le `docker-compose` du cours, envoyez les données taxi dans un topic, et écrivez votre premier consumer !
 
-Vous avez maintenant les fiches des **Modules 4, 5, 6 + Bruin** — souhaitez-vous une fiche pour un autre module (ex. **Module 1 — Docker/Terraform** ou **Module 2 — Workflow Orchestration avec Kestra/Airflow**) ? 🚀
+
