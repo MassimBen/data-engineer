@@ -652,11 +652,10 @@ parameters:
 > - [Repo GitHub Bruin](https://github.com/bruin-data/bruin)
 > - [Repo GitHub du Zoomcamp](https://github.com/DataTalksClub/data-engineering-zoomcamp)
 > - [Documentation ingestr](https://bruin-data.github.io/ingestr/)
-````
 
----
 
-## ✅ Récapitulatif
+
+## Récapitulatif
 
 Cette fiche couvre :
 
@@ -670,4 +669,4 @@ Cette fiche couvre :
 
 > ⚠️ **Rappel** : Bruin évolue vite — vérifiez la syntaxe exacte des assets (notamment `ingestr` et les `custom_checks`) avec la doc officielle et les vidéos du Zoomcamp avant de publier.
 
-Souhaitez-vous que j'ajoute une section sur un point précis (déploiement en production, intégration BigQuery, ou un exemple de homework résolu) ? 🚀
+
