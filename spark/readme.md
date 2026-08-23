@@ -1,14 +1,14 @@
 Voici la fiche de révision détaillée pour le Module 5 — **Batch Processing avec Apache Spark** — au format Markdown, prête pour GitHub.
 
----
 
-````markdown
+
+
 # Module 5 — Batch Processing avec Apache Spark
 
 > **Data Engineering Zoomcamp — DataTalksClub**
 > Fiche de révision du Module 5 : Traitement par lots (Batch Processing) avec Apache Spark
 
----
+
 
 ## 📑 Table des matières
 
@@ -836,7 +836,7 @@ gcloud dataproc jobs submit pyspark --cluster=c job.py   # Dataproc
 > - [PySpark API Reference](https://spark.apache.org/docs/latest/api/python/)
 ````
 
----
+
 
 ## ✅ Récapitulatif
 
