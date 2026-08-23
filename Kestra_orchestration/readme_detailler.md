@@ -713,6 +713,4 @@ Cette fiche couvre l'intégralité du **Module 2 (Workflow Orchestration)** :
 - **dlt** : l'outil d'ingestion Python couvert dans le module
 - **Comparaison Airflow** + **bonnes pratiques** + **questions de révision**
 
-> 💡 Copiez ce contenu dans `module2-workflow-orchestration-kestra.md`. Conseil pratique : testez le backfill mensuel sur les données taxi 2019-2021, c'est l'exercice central du module !
 
-Votre collection grandit : **Modules 2, 3, 4, 5, 6 + Bruin** ✅. Il ne manque plus que le **Module 1 (Docker, Terraform, GCP)** — voulez-vous que je le rédige pour compléter la série ? 🚀
