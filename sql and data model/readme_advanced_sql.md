@@ -1,8 +1,6 @@
 Voici le cours complet, assemblé en un seul fichier `.md`, avec une section **Optimisation Data Warehouse** entièrement retravaillée pour couvrir le Partitionnement et le Clustering (BigQuery, Snowflake, Redshift).
 
 ***
-
-```markdown
 # 🐘 Cours de SQL Avancé & Optimisation Data Warehouse
 
 Bienvenue dans ce cours complet de SQL Avancé. Ce guide est destiné aux développeurs, Data Analysts et Data Engineers qui maîtrisent déjà les bases (`SELECT`, `WHERE`, `JOIN`, `GROUP BY`) et souhaitent maîtriser la manipulation de données complexes et l'optimisation sur de gros volumes (Data Warehouses).
@@ -417,4 +415,3 @@ Fork ce repo, ajoutez vos propres exemples et créez des challenges SQL pour la 
 
 ---
 *Document généré pour la formation Advanced SQL & Data Engineering.*
-```
